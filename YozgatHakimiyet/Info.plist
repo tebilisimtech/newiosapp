@@ -19,5 +19,13 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Bu uygulama, haberleri ve görselleri fotoğraf kütüphanenize kaydetmenize olanak sağlar.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bu uygulama, haberleri ve görselleri fotoğraf kütüphanenize kaydetmenize olanak sağlar.</string>
+    <key>GADApplicationIdentifier</key>
+    <string>ca-app-pub-8676157529048601~4214683309</string>
+    <key>ADMOB_INTERSTITIAL_UNIT_ID</key>
+    <string>ca-app-pub-8676157529048601~4214683309</string>
 </dict>
 </plist>

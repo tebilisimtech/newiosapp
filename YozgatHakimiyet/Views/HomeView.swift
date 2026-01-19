@@ -25,7 +25,7 @@ struct HomeView: View {
                     
                     // Üst Manşetler
                     if !viewModel.topHeadlines.isEmpty {
-                        TopHeadlinesSection(headlines: viewModel.topHeadlines)
+                        TopHeadlinesSection(headlines: viewModel.topHeadlines, showSideMenu: $showSideMenu)
                             .padding(.bottom, 20)
                     }
                     
@@ -302,59 +302,6 @@ struct BreakingNewsCard: View {
     }
 }
 
-// MARK: - Top Headlines Section
-struct TopHeadlinesSection: View {
-    let headlines: [Post]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("ÜST MANŞETLER")
-                .font(.headline)
-                .fontWeight(.bold)
-                .padding(.horizontal)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(headlines.prefix(5)) { headline in
-                        NavigationLink(destination: PostDetailView(postId: headline.id)) {
-                            TopHeadlineCard(post: headline)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-    }
-}
-
-struct TopHeadlineCard: View {
-    let post: Post
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: URL(string: post.image.cropped.medium)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .overlay(ProgressView())
-            }
-            .frame(width: 280, height: 180)
-            .cornerRadius(12)
-            .clipped()
-            
-            Text(post.name)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .lineLimit(2)
-                .foregroundColor(.primary)
-        }
-        .frame(width: 280)
-    }
-}
 
 // MARK: - Latest Posts Section
 struct LatestPostsSection: View {

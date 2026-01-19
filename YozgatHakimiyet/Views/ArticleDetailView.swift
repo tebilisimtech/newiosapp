@@ -150,6 +150,9 @@ struct ArticleDetailView: View {
                     }
                 }
             }
+            .refreshable {
+                await viewModel.loadArticle(id: articleId)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

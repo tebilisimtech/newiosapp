@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import WebKit
 import UIKit
+import GoogleMobileAds
 
 struct PostDetailView: View {
     let postId: Int
@@ -27,6 +28,11 @@ struct PostDetailView: View {
                         .frame(height: 300)
                         .clipped()
                         
+                        // Görsel altı reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 10)
+                        
                         VStack(alignment: .leading, spacing: 16) {
                             // Title
                             Text(post.name)
@@ -34,6 +40,11 @@ struct PostDetailView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            // Başlık altı reklam
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 10)
                             
                             // Meta Info
                             VStack(alignment: .leading, spacing: 8) {
@@ -84,9 +95,44 @@ struct PostDetailView: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        // HTML Content
-                        HTMLContentView(htmlContent: post.content, width: geometry.size.width)
-                            .frame(width: geometry.size.width)
+                        // HTML Content - İlk Yarı
+                        if !viewModel.htmlContentParts.first.isEmpty {
+                            HTMLContentView(htmlContent: viewModel.htmlContentParts.first, width: geometry.size.width)
+                                .frame(width: geometry.size.width)
+                            
+                            // İçerik altı reklam (ilk yarıdan sonra)
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 10)
+                        } else {
+                            // Eğer bölünmemişse, içeriğin yarısını göster
+                            HTMLContentView(htmlContent: post.content, width: geometry.size.width)
+                                .frame(width: geometry.size.width)
+                            
+                            // İçerik altı reklam
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 10)
+                        }
+                        
+                        // Related Post Section - HTML içeriğinin ortasında
+                        if let relatedPost = viewModel.relatedPost {
+                            RelatedPostSection(relatedPost: relatedPost)
+                                .padding(.top, 30)
+                                .padding(.bottom, 30)
+                                .padding(.horizontal)
+                        }
+                        
+                        // HTML Content - İkinci Yarı
+                        if !viewModel.htmlContentParts.second.isEmpty {
+                            HTMLContentView(htmlContent: viewModel.htmlContentParts.second, width: geometry.size.width)
+                                .frame(width: geometry.size.width)
+                        }
+                        
+                        // Yorumlar öncesi reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 20)
                         
                         // Comments Section
                         CommentsView(referenceId: post.id, referenceType: "post")
@@ -101,6 +147,9 @@ struct PostDetailView: View {
                             .padding()
                     }
                 }
+            }
+            .refreshable {
+                await viewModel.loadPost(id: postId)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -173,8 +222,10 @@ struct PostDetailView: View {
 @MainActor
 class PostDetailViewModel: ObservableObject {
     @Published var post: PostDetail?
+    @Published var relatedPost: Post?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var htmlContentParts: (first: String, second: String) = ("", "")
     
     private let apiService = APIService.shared
     
@@ -185,6 +236,12 @@ class PostDetailViewModel: ObservableObject {
         do {
             let response = try await apiService.fetchPostDetail(id: id)
             post = response.data
+            
+            // HTML içeriğini ikiye böl (ortasına ilgili haber yerleştirmek için)
+            splitHTMLContent(response.data.content)
+            
+            // İlgili haberleri yükle
+            await loadRelatedPost(post: response.data)
         } catch {
             errorMessage = "Haber yüklenirken bir hata oluştu: \(error.localizedDescription)"
             print("Error loading post: \(error)")
@@ -192,13 +249,175 @@ class PostDetailViewModel: ObservableObject {
         
         isLoading = false
     }
+    
+    private func splitHTMLContent(_ content: String) {
+        // HTML içeriğini paragraflara ayır
+        let paragraphs = content.components(separatedBy: "</p>")
+        
+        // Eğer yeterli paragraf yoksa, tüm içeriği ilk kısma koy
+        guard paragraphs.count > 2 else {
+            htmlContentParts = (content, "")
+            return
+        }
+        
+        // Ortadaki paragraftan sonra böl
+        let midPoint = paragraphs.count / 2
+        let firstPart = paragraphs[0..<midPoint].joined(separator: "</p>") + "</p>"
+        let secondPart = paragraphs[midPoint..<paragraphs.count].joined(separator: "</p>")
+        
+        htmlContentParts = (firstPart, secondPart)
+    }
+    
+    private func loadRelatedPost(post: PostDetail) async {
+        // Categories'den rastgele bir category_id al
+        guard !post.categories.isEmpty else {
+            return
+        }
+        
+        // Category ID'lerini al
+        let categoryIds = Array(post.categories.keys)
+        
+        // Rastgele bir category ID seç
+        guard let randomCategoryId = categoryIds.randomElement() else {
+            return
+        }
+        
+        do {
+            let response = try await apiService.fetchRelatedPosts(postId: post.id, categoryId: randomCategoryId)
+            
+            // Mevcut post'u filtrele ve rastgele bir haber seç
+            let filteredPosts = response.data.filter { $0.id != post.id }
+            
+            if let randomPost = filteredPosts.randomElement() {
+                relatedPost = randomPost
+            } else if let firstPost = filteredPosts.first {
+                relatedPost = firstPost
+            }
+        } catch {
+            // İlgili haber yüklenemezse sessizce devam et
+            print("⚠️ Error loading related post: \(error.localizedDescription)")
+        }
+    }
+}
+
+// MARK: - Related Post Section
+struct RelatedPostSection: View {
+    let relatedPost: Post
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Group {
+                if let type = relatedPost.type?.lowercased() {
+                    switch type {
+                    case "video":
+                        NavigationLink(destination: VideoDetailView(videoId: relatedPost.id)) {
+                            relatedPostCardContent
+                        }
+                    case "gallery":
+                        NavigationLink(destination: GalleryDetailView(galleryId: relatedPost.id)) {
+                            relatedPostCardContent
+                        }
+                    case "article":
+                        NavigationLink(destination: ArticleDetailView(articleId: relatedPost.id, showSideMenu: .constant(false))) {
+                            relatedPostCardContent
+                        }
+                    default: // "post" veya diğerleri
+                        NavigationLink(destination: PostDetailView(postId: relatedPost.id)) {
+                            relatedPostCardContent
+                        }
+                    }
+                } else {
+                    // Type yoksa varsayılan olarak PostDetailView
+                    NavigationLink(destination: PostDetailView(postId: relatedPost.id)) {
+                        relatedPostCardContent
+                    }
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+    }
+    
+    private var relatedPostCardContent: some View {
+        ZStack(alignment: .leading) {
+            // Red Background
+            Color.red
+                .frame(height: 140)
+            
+            HStack(spacing: 0) {
+                // Image Section (Left)
+                AsyncImage(url: URL(string: relatedPost.image.cropped.medium)) { phase in
+                    switch phase {
+                    case .empty:
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(ProgressView())
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .font(.system(size: 30))
+                                    .foregroundColor(.gray)
+                            )
+                    @unknown default:
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                    }
+                }
+                .frame(width: 140, height: 140)
+                .clipped()
+                
+                // Text Section (Right)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(relatedPost.name)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 12)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: 140)
+            }
+            
+            // Gradient Overlay on Image
+            LinearGradient(
+                colors: [
+                    Color.clear,
+                    Color.black.opacity(0.3)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: 140, height: 140)
+        }
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.red.opacity(0.5), lineWidth: 1)
+        )
+    }
 }
 
 // MARK: - HTML Content View
 struct HTMLContentView: UIViewRepresentable {
     let htmlContent: String
     let width: CGFloat
+    let hideFirstHeading: Bool
     @State private var contentHeight: CGFloat = 400
+    
+    init(htmlContent: String, width: CGFloat, hideFirstHeading: Bool = false) {
+        self.htmlContent = htmlContent
+        self.width = width
+        self.hideFirstHeading = hideFirstHeading
+    }
     
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -215,6 +434,29 @@ struct HTMLContentView: UIViewRepresentable {
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
+        // HTML içeriğinden ilk başlığı kaldır (eğer hideFirstHeading true ise)
+        var processedContent = htmlContent
+        if hideFirstHeading {
+            // İlk h1, h2, h3 etiketini kaldır
+            let patterns = [
+                #"<h1[^>]*>.*?</h1>"#,
+                #"<h2[^>]*>.*?</h2>"#,
+                #"<h3[^>]*>.*?</h3>"#
+            ]
+            
+            for pattern in patterns {
+                if let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators]) {
+                    let range = NSRange(processedContent.startIndex..., in: processedContent)
+                    if let match = regex.firstMatch(in: processedContent, range: range) {
+                        if let swiftRange = Range(match.range, in: processedContent) {
+                            processedContent.removeSubrange(swiftRange)
+                            break // İlk eşleşmeyi bulduk, çık
+                        }
+                    }
+                }
+            }
+        }
+        
         let htmlString = """
         <!DOCTYPE html>
         <html>
@@ -248,6 +490,25 @@ struct HTMLContentView: UIViewRepresentable {
                     margin: 20px 0 12px 0;
                     font-weight: 600;
                 }
+                \(hideFirstHeading ? """
+                /* İlk başlık etiketlerini gizle */
+                body > h1:first-of-type,
+                body > h2:first-of-type,
+                body > h3:first-of-type,
+                body > h4:first-of-type,
+                body > h5:first-of-type,
+                body > h6:first-of-type,
+                body > *:first-child h1:first-of-type,
+                body > *:first-child h2:first-of-type,
+                body > *:first-child h3:first-of-type,
+                body > div:first-child h1,
+                body > div:first-child h2,
+                body > div:first-child h3,
+                body > p:first-child strong,
+                body > p:first-child b {
+                    display: none !important;
+                }
+                """ : "")
                 a {
                     color: #007AFF;
                     text-decoration: none;
@@ -260,6 +521,29 @@ struct HTMLContentView: UIViewRepresentable {
             </style>
             <script>
                 window.addEventListener('load', function() {
+                    \(hideFirstHeading ? """
+                    // İlk başlığı gizle (h1, h2, h3) - daha agresif yaklaşım
+                    function hideFirstHeading() {
+                        // Önce h1, h2, h3 etiketlerini kontrol et
+                        var headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                        if (headings.length > 0) {
+                            headings[0].style.display = 'none';
+                        }
+                        // Ayrıca div içindeki ilk başlık benzeri içeriği de kontrol et
+                        var firstDiv = document.querySelector('body > div:first-child, body > p:first-child');
+                        if (firstDiv) {
+                            var text = firstDiv.textContent.trim();
+                            // Eğer ilk div/p içeriği başlık gibi görünüyorsa (büyük harfler, kısa metin) gizle
+                            if (text.length < 200 && (text === text.toUpperCase() || firstDiv.querySelector('strong, b'))) {
+                                firstDiv.style.display = 'none';
+                            }
+                        }
+                    }
+                    hideFirstHeading();
+                    // DOM değişikliklerini izle
+                    setTimeout(hideFirstHeading, 100);
+                    setTimeout(hideFirstHeading, 500);
+                    """ : "")
                     setTimeout(function() {
                         var height = document.body.scrollHeight;
                         window.webkit.messageHandlers.heightChanged.postMessage(height);

@@ -148,6 +148,10 @@ struct AuthorDetailView: View {
             }
             .padding(.vertical)
         }
+        .refreshable {
+            await viewModel.loadAuthor(id: authorId)
+            await viewModel.loadAuthorArticles(authorId: authorId)
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {

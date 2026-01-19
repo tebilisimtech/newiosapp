@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "0AD8D9712F0F24B100C4C0F2"
-               BuildableName = "YozgatHakimiyet.app"
-               BlueprintName = "YozgatHakimiyet"
+               BuildableName = "HDTest.app"
+               BlueprintName = "HDTest"
                ReferencedContainer = "container:YozgatHakimiyet.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0AD8D9712F0F24B100C4C0F2"
-            BuildableName = "YozgatHakimiyet.app"
-            BlueprintName = "YozgatHakimiyet"
+            BuildableName = "HDTest.app"
+            BlueprintName = "HDTest"
             ReferencedContainer = "container:YozgatHakimiyet.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0AD8D9712F0F24B100C4C0F2"
-            BuildableName = "YozgatHakimiyet.app"
-            BlueprintName = "YozgatHakimiyet"
+            BuildableName = "HDTest.app"
+            BlueprintName = "HDTest"
             ReferencedContainer = "container:YozgatHakimiyet.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

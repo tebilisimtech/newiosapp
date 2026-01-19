@@ -26,11 +26,12 @@ struct Post: Codable, Identifiable {
     let headline: Headline?
     let directLink: String?
     let author: Author?
+    let type: String? // Post, Video, Gallery, Article vb.
     let createdAt: String
     let updatedAt: String?
     
     enum CodingKeys: String, CodingKey {
-        case id, name, slug, url, description, categories, image, headline
+        case id, name, slug, url, description, categories, image, headline, type
         case directLink = "direct_link"
         case author
         case createdAt = "created_at"
@@ -65,6 +66,7 @@ struct Post: Codable, Identifiable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
         directLink = try container.decodeIfPresent(String.self, forKey: .directLink)
         author = try container.decodeIfPresent(Author.self, forKey: .author)
+        type = try container.decodeIfPresent(String.self, forKey: .type)
         
         // categories - farklı formatlar olabilir
         if let categoriesDict = try? container.decodeIfPresent([String: String].self, forKey: .categories) {

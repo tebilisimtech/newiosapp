@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import GoogleMobileAds
 
 struct GalleryDetailView: View {
     let galleryId: Int
@@ -28,6 +29,11 @@ struct GalleryDetailView: View {
                         .frame(height: 300)
                         .clipped()
                         
+                        // Görsel altı reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 10)
+                        
                         VStack(alignment: .leading, spacing: 16) {
                             // Title
                             Text(gallery.name)
@@ -35,6 +41,11 @@ struct GalleryDetailView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            // Başlık altı reklam
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 10)
                             
                             // Meta Info
                             VStack(alignment: .leading, spacing: 8) {
@@ -103,7 +114,19 @@ struct GalleryDetailView: View {
                                     }
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                
+                                // Her 3 fotoğraftan sonra reklam (opsiyonel)
+                                if (index + 1) % 3 == 0 {
+                                    AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                        .frame(height: 50)
+                                        .padding(.vertical, 10)
+                                }
                             }
+                            
+                            // Yorumlar öncesi reklam
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 20)
                             
                             // Comments Section
                             if let gallery = viewModel.gallery {
@@ -120,6 +143,9 @@ struct GalleryDetailView: View {
                             .padding()
                     }
                 }
+            }
+            .refreshable {
+                await viewModel.loadGallery(id: galleryId)
             }
         }
         .navigationTitle("Foto Galeri")

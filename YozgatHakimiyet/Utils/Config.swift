@@ -10,6 +10,25 @@ class Config {
     var baseURL: String = ""
     var apiKey: String = ""
     
+    // AdMob Unit ID'leri
+    var adMobBannerUnitID: String {
+        // Info.plist'ten oku veya test ID kullan
+        if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_BANNER_UNIT_ID") as? String, !adUnitID.isEmpty {
+            return adUnitID
+        }
+        // Test Unit ID (Google'ın test reklamı)
+        return "ca-app-pub-3940256099942544/2934735716"
+    }
+    
+    var adMobInterstitialUnitID: String {
+        // Info.plist'ten oku veya test ID kullan
+        if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_INTERSTITIAL_UNIT_ID") as? String, !adUnitID.isEmpty {
+            return adUnitID
+        }
+        // Test Unit ID (Google'ın test reklamı)
+        return "ca-app-pub-3940256099942544/4411468910"
+    }
+    
     private func loadEnvironmentVariables() {
         // Önce Info.plist'ten oku
         if let baseURLFromPlist = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String {

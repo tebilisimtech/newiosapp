@@ -7,10 +7,16 @@
 
 import SwiftUI
 import UserNotifications
+import GoogleMobileAds
 
 @main
 struct YozgatHakimiyetApp: App {
     @StateObject private var oneSignalService = OneSignalService.shared
+    
+    init() {
+        // AdMob'u initialize et
+        AdMobHelper.shared.initialize()
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -23,8 +29,8 @@ struct YozgatHakimiyetApp: App {
                     
                     // Push notification delegate'i ayarla
                     setupNotificationDelegate()
-                }
-        }
+    }
+}
     }
     
     private func setupNotificationDelegate() {

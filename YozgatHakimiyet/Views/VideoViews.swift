@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import WebKit
 import SafariServices
+import GoogleMobileAds
 
 // MARK: - Video List View
 struct VideoListView: View {
@@ -119,6 +120,11 @@ struct VideoDetailView: View {
                             .background(Color(.systemGray6))
                         }
                         
+                        // Görsel/Video altı reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 10)
+                        
                         VStack(alignment: .leading, spacing: 16) {
                             // Title
                             Text(video.name)
@@ -195,15 +201,30 @@ struct VideoDetailView: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
-                            // HTML Content if available
-                            if let content = video.content, !content.isEmpty {
-                                HTMLContentView(htmlContent: content, width: geometry.size.width)
-                                    .frame(width: geometry.size.width)
-                            }
+                        // Başlık altı reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 10)
+                        
+                        // HTML Content if available
+                        if let content = video.content, !content.isEmpty {
+                            HTMLContentView(htmlContent: content, width: geometry.size.width, hideFirstHeading: true)
+                                .frame(width: geometry.size.width)
                             
-                            // Comments Section
-                            CommentsView(referenceId: video.id, referenceType: "video")
-                                .padding(.top, 20)
+                            // İçerik altı reklam
+                            AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                                .frame(height: 50)
+                                .padding(.vertical, 10)
+                        }
+                        
+                        // Yorumlar öncesi reklam
+                        AdBannerView(adUnitID: Config.shared.adMobBannerUnitID)
+                            .frame(height: 50)
+                            .padding(.vertical, 20)
+                        
+                        // Comments Section
+                        CommentsView(referenceId: video.id, referenceType: "video")
+                            .padding(.top, 20)
                         
                     } else if viewModel.isLoading {
                         ProgressView()
