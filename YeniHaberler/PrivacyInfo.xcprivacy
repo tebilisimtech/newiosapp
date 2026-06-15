@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        Yozgat Hakimiyet — Apple Privacy Manifest
+        Apple Reference:
+        https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+    -->
+
+    <!-- ============================================================ -->
+    <!-- TRACKING                                                      -->
+    <!-- ============================================================ -->
+    <!--
+        AdMob IDFA topladığı için uygulama "tracking" yapıyor sayılır.
+        ATTService.swift ile kullanıcı izni ATT prompt üzerinden alınır.
+    -->
+    <key>NSPrivacyTracking</key>
+    <true/>
+
+    <key>NSPrivacyTrackingDomains</key>
+    <array>
+        <!-- AdMob / Google Ad tracking domain'leri.
+             ATT izni reddedilirse iOS bu domain'lere yapılan istekleri bloklar. -->
+        <string>googleads.g.doubleclick.net</string>
+        <string>googlesyndication.com</string>
+        <string>doubleclick.net</string>
+        <string>googleadservices.com</string>
+    </array>
+
+    <!-- ============================================================ -->
+    <!-- COLLECTED DATA TYPES                                          -->
+    <!-- ============================================================ -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+
+        <!-- 1. Device ID (Advertising)
+             AdMob → IDFA (kullanıcı ATT izni verdiyse) -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeDeviceID</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</string>
+            </array>
+        </dict>
+
+        <!-- 2. Product Interaction
+             OneSignal → bildirim engagement (açılma, tıklama)
+             AdMob → reklam etkileşimi -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeProductInteraction</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+        <!-- 3. Performance Data (crash, hang, energy)
+             AdMob/OneSignal SDK'ları MetricKit benzeri performance verisi gönderebilir -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypePerformanceData</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+        <!-- 4. Coarse Location (OneSignal opsiyonel)
+             OneSignal lokasyon-bazlı bildirim için coarse location kullanabilir -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeCoarseLocation</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+        <!-- 5. Other Diagnostic Data
+             OneSignal device info (OS sürümü, model, dil) -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeOtherDiagnosticData</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+    </array>
+
+    <!-- ============================================================ -->
+    <!-- ACCESSED API TYPES (Required Reason API)                      -->
+    <!-- ============================================================ -->
+    <!--
+        Apple, belirli system API'lerin kullanım sebebini deklare etmeyi zorunlu kılar.
+        Reference: https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api
+    -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+
+        <!-- UserDefaults — favoriler, okuma geçmişi, kullanıcı tercihleri
+             FavoritesService, ReadingHistoryService, UserPreferences -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- CA92.1: Access info from same app, per documentation -->
+                <string>CA92.1</string>
+            </array>
+        </dict>
+
+        <!-- File Timestamp — image cache LRU (ileride P1-02 ile aktive olacak)
+             ImageCache.evictExpired() modification date kontrolü
+             Şu an aktif kullanılmıyor ama gelecek için declare ediyoruz. -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- C617.1: Display file timestamps to user / cache management -->
+                <string>C617.1</string>
+            </array>
+        </dict>
+
+        <!-- System Boot Time — UIDevice / OneSignal SDK kullanır
+             3rd party SDK manifest'i ile birleştirilir -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategorySystemBootTime</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- 35F9.1: Measure time elapsed between events in app -->
+                <string>35F9.1</string>
+            </array>
+        </dict>
+
+    </array>
+</dict>
+</plist>

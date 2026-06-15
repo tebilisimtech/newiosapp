@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22269" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CDPost" representedClassName="CDPost" syncable="YES" codeGenerationType="class">
+        <attribute name="agency" optional="YES" attributeType="String"/>
+        <attribute name="bikId" optional="YES" attributeType="String"/>
+        <attribute name="categoriesJSON" optional="YES" attributeType="String"/>
+        <attribute name="contentHTML" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="String"/>
+        <attribute name="descriptionText" optional="YES" attributeType="String"/>
+        <attribute name="detailFetchedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="embed" optional="YES" attributeType="String"/>
+        <attribute name="etag" optional="YES" attributeType="String"/>
+        <attribute name="headlineImage" optional="YES" attributeType="String"/>
+        <attribute name="headlineName" optional="YES" attributeType="String"/>
+        <attribute name="hit" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="imageLarge" optional="YES" attributeType="String"/>
+        <attribute name="imageMedium" optional="YES" attributeType="String"/>
+        <attribute name="imageOriginal" optional="YES" attributeType="String"/>
+        <attribute name="imageSquare" optional="YES" attributeType="String"/>
+        <attribute name="imageThumb" optional="YES" attributeType="String"/>
+        <attribute name="isFavorite" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isFullyLoaded" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isRead" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastFetchedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="nextId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="positionsJSON" optional="YES" attributeType="String"/>
+        <attribute name="previousId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="reporter" optional="YES" attributeType="String"/>
+        <attribute name="slug" optional="YES" attributeType="String"/>
+        <attribute name="source" optional="YES" attributeType="String"/>
+        <attribute name="tagsJSON" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" optional="YES" attributeType="String"/>
+        <attribute name="urlString" optional="YES" attributeType="String"/>
+        <attribute name="videoURL" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+        <fetchIndex name="byId">
+            <fetchIndexElement property="id" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byCreatedAt">
+            <fetchIndexElement property="createdAt" type="Binary" order="descending"/>
+        </fetchIndex>
+        <fetchIndex name="byType">
+            <fetchIndexElement property="type" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="CDSyncMetadata" representedClassName="CDSyncMetadata" syncable="YES" codeGenerationType="class">
+        <attribute name="etag" optional="YES" attributeType="String"/>
+        <attribute name="itemCount" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastAttemptedSync" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastError" optional="YES" attributeType="String"/>
+        <attribute name="lastSuccessfulSync" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="queryKey" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="queryKey"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+        <fetchIndex name="byQueryKey">
+            <fetchIndexElement property="queryKey" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="CDFavorite" representedClassName="CDFavorite" syncable="YES" codeGenerationType="class">
+        <attribute name="authorName" optional="YES" attributeType="String"/>
+        <attribute name="categoryName" optional="YES" attributeType="String"/>
+        <attribute name="compositeId" optional="YES" attributeType="String"/>
+        <attribute name="createdAtSnapshot" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
+        <attribute name="refId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="refType" optional="YES" attributeType="String"/>
+        <attribute name="savedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="compositeId"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+        <fetchIndex name="byCompositeId">
+            <fetchIndexElement property="compositeId" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="bySavedAt">
+            <fetchIndexElement property="savedAt" type="Binary" order="descending"/>
+        </fetchIndex>
+        <fetchIndex name="byRefType">
+            <fetchIndexElement property="refType" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="CDHistoryItem" representedClassName="CDHistoryItem" syncable="YES" codeGenerationType="class">
+        <attribute name="authorName" optional="YES" attributeType="String"/>
+        <attribute name="categoryName" optional="YES" attributeType="String"/>
+        <attribute name="compositeId" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
+        <attribute name="readAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="readDurationSeconds" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="refId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="refType" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="compositeId"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+        <fetchIndex name="byCompositeId">
+            <fetchIndexElement property="compositeId" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byReadAt">
+            <fetchIndexElement property="readAt" type="Binary" order="descending"/>
+        </fetchIndex>
+    </entity>
+</model>
